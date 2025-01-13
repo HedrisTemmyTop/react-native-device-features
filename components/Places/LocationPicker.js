@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import OutlinedButton from "../UI/OutlinedButton";
 import { Colors } from "../../constants/colors";
 import {
@@ -8,11 +8,23 @@ import {
   PermissionStatus,
 } from "expo-location";
 import MapView, { Marker } from "react-native-maps";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
-const LocationPicker = () => {
+const LocationPicker = ({ onPickLocation }) => {
   const [location, setLocation] = useState(null);
+
   const navigation = useNavigation();
+  const route = useRoute();
+
+  useEffect(() => {
+    if (!route.params) return;
+    const { selectedLocation } = route.params;
+    setLocation(selectedLocation);
+  }, [route]);
+
+  useEffect(() => {
+    onPickLocation(location);
+  }, [location, onPickLocation]);
   const [locationPermission, requestPermission] = useForegroundPermissions();
   const verifyPermission = async function () {
     if (locationPermission.status === PermissionStatus.UNDETERMINED) {
@@ -45,7 +57,6 @@ const LocationPicker = () => {
       latitude,
       longitude,
     });
-    console.log(location);
   };
   const handlePickOnMap = function () {
     console.log("navigate");
